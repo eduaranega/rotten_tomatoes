@@ -74,11 +74,13 @@
     
 }
 
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     //NSLog(@"%@", [NSString stringWithFormat:@"Section %d, Row %ld", indexPath.section, (long)indexPath.row]);
     //UITableViewCell *cell = [[UITableViewCell alloc] init];
     
+    // this is to remove the gray selection of the table view
     MovieCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell"];
     
     NSDictionary *movie = self.movies[indexPath.row];
