@@ -10,12 +10,19 @@
 #import "MovieCell.h"
 #import "UIImageView+AFNetworking.h"
 #import "MovieDetailViewController.h"
+#import "SVProgressHUD.h"
 
 @interface MoviesViewController () <UITableViewDataSource, UITableViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (nonatomic, strong) NSArray *names;
 @property (nonatomic, strong) NSArray *movies;
+
+// load refresh
+@property (strong, nonatomic) UIRefreshControl *refreshControl;
+
+// error message for network error
+@property (weak, nonatomic) IBOutlet UILabel *networkError;
 
 
 
@@ -28,23 +35,8 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     
-    self.names = @[ @"a", @"b", @"c", @"d"];
-    
-    NSURL *url = [NSURL URLWithString:@"http://api.rottentomatoes.com/api/public/v1.0/lists/movies/box_office.json?apikey=dagqdghwaq3e3mxyrp7kmmj5&limit=20&country=us"];
-    
-    NSURLRequest *request = [NSURLRequest requestWithURL:url];
-    
-    // async call
-    [NSURLConnection sendAsynchronousRequest:request queue: [NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+    [SVProgressHUD showWithStatus:@"Loading"];
         
-        NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error: nil];
-        self.movies = responseDictionary[@"movies"];
-        NSLog(@"resonse: %@", responseDictionary);
-        
-        [self.tableView reloadData];
-                                            
-    }];
-    
     // set myself to the data source
     self.tableView.dataSource = self;
     
@@ -59,6 +51,38 @@
     // hey tableView if I say @"MovieCell", you give me an instance of nibWithNibName:@"MovieCell"
     [self.tableView registerNib:[UINib nibWithNibName:@"MovieCell" bundle:nil] forCellReuseIdentifier:@"MovieCell"];
     
+    
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    [self.refreshControl addTarget:self action:@selector(onRefresh) forControlEvents:UIControlEventValueChanged];
+    [self.tableView insertSubview:self.refreshControl atIndex:0];
+    [self onRefresh];
+    
+}
+
+- (void)onRefresh {
+    
+    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:[NSURL URLWithString:@"http://api.rottentomatoes.com/api/public/v1.0/lists/movies/box_office.json?apikey=dagqdghwaq3e3mxyrp7kmmj5"]];
+    
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
+        [self.refreshControl endRefreshing];
+        [SVProgressHUD dismiss];
+        if (connectionError) {
+            self.networkError.text = @"Network Connection Error... Try Again.";
+            self.networkError.hidden = NO;
+            return;
+        }
+        else {
+            self.networkError.hidden = YES;
+        }
+
+        //callback here
+        NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        
+        self.movies = responseDictionary[@"movies"];
+        //self.filteredMovies = [NSMutableArray arrayWithArray:self.movies];
+        
+        [self.tableView reloadData];
+    }];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -110,7 +134,6 @@
     
     [self.navigationController pushViewController:movieDetailvc animated: YES];
 }
-
 
 /*
 #pragma mark - Navigation
