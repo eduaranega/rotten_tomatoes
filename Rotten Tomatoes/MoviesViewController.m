@@ -12,11 +12,11 @@
 #import "MovieDetailViewController.h"
 #import "SVProgressHUD.h"
 
-@interface MoviesViewController () <UITableViewDataSource, UITableViewDelegate>
+@interface MoviesViewController () <UITableViewDataSource, UITableViewDelegate, UISearchBarDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (nonatomic, strong) NSArray *names;
-@property (nonatomic, strong) NSArray *movies;
+@property (nonatomic, strong) NSMutableArray *movies;
 
 // load refresh
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
@@ -24,7 +24,9 @@
 // error message for network error
 @property (weak, nonatomic) IBOutlet UILabel *networkError;
 
-
+// search bar
+@property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
+@property (strong, nonatomic) NSMutableArray *filteredMovies;
 
 
 @end
@@ -50,6 +52,9 @@
     
     // hey tableView if I say @"MovieCell", you give me an instance of nibWithNibName:@"MovieCell"
     [self.tableView registerNib:[UINib nibWithNibName:@"MovieCell" bundle:nil] forCellReuseIdentifier:@"MovieCell"];
+    
+    // search bar
+    self.searchBar.delegate = self;
     
     
     self.refreshControl = [[UIRefreshControl alloc] init];
@@ -79,7 +84,7 @@
         NSDictionary *responseDictionary = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         
         self.movies = responseDictionary[@"movies"];
-        //self.filteredMovies = [NSMutableArray arrayWithArray:self.movies];
+        self.filteredMovies = [NSMutableArray arrayWithArray:self.movies];
         
         [self.tableView reloadData];
     }];
@@ -131,9 +136,10 @@
     MovieDetailViewController *movieDetailvc = [[MovieDetailViewController alloc] init];
     
     movieDetailvc.movie = self.movies[indexPath.row];
-    
     [self.navigationController pushViewController:movieDetailvc animated: YES];
+
 }
+
 
 /*
 #pragma mark - Navigation

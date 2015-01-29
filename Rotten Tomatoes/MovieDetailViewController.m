@@ -34,7 +34,7 @@
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:imageUrl] cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:5.0f];
     
     [self.hdPicture setImageWithURLRequest:request placeholderImage:[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:thumbnailUrl]]] success:^(NSURLRequest *request, NSHTTPURLResponse *response, UIImage *image) {
-        [UIView transitionWithView:self.hdPicture duration:2.0f options:UIViewAnimationOptionTransitionCrossDissolve animations:^{ self.hdPicture.image = image;
+        [UIView transitionWithView:self.hdPicture duration:3.0f options:UIViewAnimationOptionTransitionCrossDissolve animations:^{ self.hdPicture.image = image;
         } completion:nil];
     } failure:nil];
 
