@@ -7,8 +7,13 @@
 //
 
 #import "MovieDetailViewController.h"
+#import "UIImageView+AFNetworking.h"
 
 @interface MovieDetailViewController ()
+
+@property (weak, nonatomic) IBOutlet UILabel *titleLabel;
+@property (weak, nonatomic) IBOutlet UILabel *synopsisLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *hdPicture;
 
 @end
 
@@ -22,6 +27,17 @@
     
     self.titleLabel.text = self.movie[@"title"];
     self.synopsisLabel.text = self.movie[@"synopsis"];
+    
+    NSString *thumbnailUrl = [self.movie valueForKeyPath:@"posters.thumbnail"];
+    NSString *imageUrl = [[self.movie valueForKeyPath:@"posters.original"] stringByReplacingOccurrencesOfString:@"_tmb" withString:@"_ori"];
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:imageUrl] cachePolicy:NSURLRequestReturnCacheDataElseLoad timeoutInterval:5.0f];
+    
+    [self.hdPicture setImageWithURLRequest:request placeholderImage:[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:thumbnailUrl]]] success:^(NSURLRequest *request, NSHTTPURLResponse *response, UIImage *image) {
+        [UIView transitionWithView:self.hdPicture duration:2.0f options:UIViewAnimationOptionTransitionCrossDissolve animations:^{ self.hdPicture.image = image;
+        } completion:nil];
+    } failure:nil];
+
 
     
 }
