@@ -120,7 +120,17 @@
     cell.titleLabel.text = movie[@"title"];
     cell.synopsisLabel.text = movie[@"synopsis"];
     
-    [cell.posterView setImageWithURL:[NSURL URLWithString: [movie valueForKeyPath:@"posters.thumbnail"]]];
+    //[cell.posterView setImageWithURL:[NSURL URLWithString: [movie valueForKeyPath:@"posters.thumbnail"]]];
+
+    // fade in the image
+    [cell.posterView setImageWithURLRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:[movie valueForKeyPath:@"posters.thumbnail"]]] placeholderImage:nil success:^(NSURLRequest *request, NSHTTPURLResponse *response, UIImage *image) {
+        cell.posterView.image = image;
+        cell.posterView.alpha = 0.0;
+        [UIView animateWithDuration:0.5 animations:^{
+            cell.posterView.alpha = 1.0;
+        }];
+    } failure:nil];
+    
     
     self.title = @"Rotten Tomatoes Movies";
     
